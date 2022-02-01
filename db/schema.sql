@@ -8,7 +8,7 @@ CREATE TABLE department (
   department_name VARCHAR(30)
 );
 
-CREATE TABLE job (
+CREATE TABLE role (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(30),
   salary DECIMAL,
@@ -20,15 +20,15 @@ CREATE TABLE employee (
   id INT AUTO_INCREMENT PRIMARY KEY,
   first_name VARCHAR(30),
   last_name VARCHAR(30),
-  job_id INT,
+  role_id INT,
   manager_id INT,
-  FOREIGN KEY (job_id) REFERENCES job(id), 
+  FOREIGN KEY (role_id) REFERENCES role(id), 
   FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
 
 SHOW COLUMNS FROM department;
 SHOW COLUMNS FROM employee;
-SHOW COLUMNS FROM job;
+SHOW COLUMNS FROM role;
 
 
 

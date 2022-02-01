@@ -4,12 +4,16 @@ const conTable = require('console.table');
 const express = require('express');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+//const mysql = require('mysql2/promise'); 
+const internal = require("stream");
 
 
 //import required files 
 const add = require("./lib/add");
-const view = require("./lib/view");
-const questions = require("./lib/questions")
+//const view = require("./lib/view");
+const questions = require("./lib/questions");
+const { response } = require("express");
+const { exit } = require("process");
 
 
 const PORT = process.env.PORT || 3001;
@@ -19,11 +23,21 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Connect to database
+const company = mysql.createConnection(
+    {
+      host: 'localhost',
+      user: 'root',
+      password: '',
+      database: 'company_db'
+    },
+    console.log(`Connected to the company_db database.`)
+);
 
+  
 const init = () => {
     //prompt user for what they would like to do 
     inquirer.prompt(questions.startQuestion).then((response) => {
-
         
         //object destructing to pull out repsonse 
         const { startOption }  = response;
@@ -33,15 +47,33 @@ const init = () => {
         //switch statement to call fxn based on input 
         switch (startOption) {
             case "View All Departments":{
-                view.viewDepartments();
-            } break;
+
+                company.query('SELECT * FROM department', function (err, results) {
+                    console.log ("\n")
+                    console.table(results);
+                    console.log ("\n");
+                    continueQ();
+            });
+            } break;;
 
             case "View All Roles": { 
-                view.viewRoles();
+
+                company.query('SELECT * FROM role', function (err, results) {
+                    console.log (" \n");
+                    console.table(results);
+                    console.log (" \n");
+                    init();
+                });
             } break;
 
             case "View All Employees": {
-                view.viewEmployees();
+
+                company.query('SELECT * FROM employee', function (err, results) {
+                    console.log ("\n");
+                    console.table(results);
+                    console.log ("\n");
+                    init();
+                });
             } break; 
 
             case  "Add a Department": {
@@ -63,7 +95,22 @@ const init = () => {
     }) 
 }
 
+const continueQ = () => {
+   
+    inquirer.prompt(questions.continueYN).then((response) => {
+        const { continueYN } = response;
+
+        if (continueYN === "Yes"){  
+            init(); 
+        } else {
+            console.log("Thank you for using this program. Press ^C to exit. ");
+        }
+    })   
+}
+
+
 init();
 
+    
 
 
