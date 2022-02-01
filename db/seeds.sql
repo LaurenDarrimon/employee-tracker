@@ -9,11 +9,11 @@ VALUES  ("Engineer", 130000, 1),
         ("Head of Marketing", 190000, 2);
      
 INSERT INTO employee (first_name, last_name, job_id, manager_id)
-VALUES   ("Elliot", "Smith", 1, 3),
-        ("Igor", "Stein", 1, 3),
-        ("Amira", "Afzal", 2, 2), 
-        ("Christoper", "Lee", 3, 5),
-        ("Verónica", "Rodriguez", 4, 3);
+VALUES  ("Amira", "Afzal", 2, null),  
+        ("Verónica", "Rodriguez", 4, null),  
+        ("Elliot", "Smith", 1, 1),
+        ("Igor", "Stein", 1, 1),
+        ("Christoper", "Lee", 3, 2);
 
 
 SELECT * FROM department;
