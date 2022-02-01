@@ -1,0 +1,25 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "employee tracker taking input from CLI stored in SQL database",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LaurenDarrimon/employee-tracker.git"
+  },
+  "author": "Lauren Darrimon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LaurenDarrimon/employee-tracker/issues"
+  },
+  "homepage": "https://github.com/LaurenDarrimon/employee-tracker#readme",
+  "dependencies": {
+    "express": "^4.17.2",
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.3"
+  }
+}
