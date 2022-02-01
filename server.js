@@ -13,10 +13,10 @@ const add = require("./lib/add");
 //const view = require("./lib/view");
 const questions = require("./lib/questions");
 const { response } = require("express");
-const { exit } = require("process");
+//const { exit } = require("process");
 
 
-const PORT = process.env.PORT || 3001;
+//const PORT = process.env.PORT || 3001;
 const app = express();
 
 // Express middleware
@@ -46,33 +46,31 @@ const init = () => {
 
         //switch statement to call fxn based on input 
         switch (startOption) {
-            case "View All Departments":{
 
+            case "View All Departments":{
                 company.query('SELECT * FROM department', function (err, results) {
                     console.log ("\n")
                     console.table(results);
                     console.log ("\n");
                     continueQ();
-            });
+                });
             } break;;
 
             case "View All Roles": { 
-
                 company.query('SELECT * FROM role', function (err, results) {
                     console.log (" \n");
                     console.table(results);
                     console.log (" \n");
-                    init();
+                    continueQ();
                 });
             } break;
 
             case "View All Employees": {
-
                 company.query('SELECT * FROM employee', function (err, results) {
                     console.log ("\n");
                     console.table(results);
                     console.log ("\n");
-                    init();
+                    continueQ();
                 });
             } break; 
 
@@ -96,14 +94,12 @@ const init = () => {
 }
 
 const continueQ = () => {
-   
     inquirer.prompt(questions.continueYN).then((response) => {
-        const { continueYN } = response;
-
-        if (continueYN === "Yes"){  
+        if (response.continue === 'yes'){  
             init(); 
         } else {
-            console.log("Thank you for using this program. Press ^C to exit. ");
+            console.log("Thank you for using this program.");
+            process.exit();
         }
     })   
 }
