@@ -34,6 +34,13 @@ const company = mysql.createConnection(
     console.log(`Connected to the company_db database.`)
 );
 
+const viewTableFunction = (viewTable) => {
+    company.query(`SELECT * FROM ${viewTable}`, function (err, results) {
+        console.log ("\n")
+        console.table(results);
+        continueQ();
+    });
+}
   
 const init = () => {
     //prompt user for what they would like to do 
@@ -43,35 +50,20 @@ const init = () => {
         const { startOption }  = response;
 
         console.log (startOption);
-
+     
         //switch statement to call fxn based on input 
         switch (startOption) {
 
             case "View All Departments":{
-                company.query('SELECT * FROM department', function (err, results) {
-                    console.log ("\n")
-                    console.table(results);
-                    console.log ("\n");
-                    continueQ();
-                });
+                viewTableFunction("department"); //display department table
             } break;;
 
-            case "View All Roles": { 
-                company.query('SELECT * FROM role', function (err, results) {
-                    console.log (" \n");
-                    console.table(results);
-                    console.log (" \n");
-                    continueQ();
-                });
+            case "View All Roles" : { 
+                viewTableFunction("role"); //display role table
             } break;
 
             case "View All Employees": {
-                company.query('SELECT * FROM employee', function (err, results) {
-                    console.log ("\n");
-                    console.table(results);
-                    console.log ("\n");
-                    continueQ();
-                });
+                viewTableFunction("employee");   //display employee table
             } break; 
 
             case  "Add a Department": {
