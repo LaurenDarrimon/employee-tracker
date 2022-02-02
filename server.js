@@ -54,10 +54,11 @@ const init = () => { //prompt user for what they would like to do
 
             case "View All Employees": {
                 let sql = 
-                    `SELECT employee.id, first_name, last_name, title, salary, department_name
+                    `SELECT employee.id, employee.first_name, employee.last_name, title, salary, department_name, manager.last_name AS manager
                     FROM employee
                     LEFT JOIN role ON role_id = role.id
-                    LEFT JOIN department ON department_id = department.id`;
+                    LEFT JOIN department ON department_id = department.id
+                    LEFT JOIN employee AS manager ON employee.manager_id = manager.id`;
                 viewTableFunction(sql);   //display employee table,
             } break; 
 
@@ -104,7 +105,8 @@ const addDepartment = () => {
                 return;
             }
             console.log(`All Departments (with newly added ${department_name}`)
-            viewTableFunction("department"); 
+            let sql = `SELECT * FROM department`
+            viewTableFunction(sql);
         });
     });
 };
@@ -151,7 +153,11 @@ const addRole = () => {
                 return;
             }
             console.log(`All Roles (plus newly added role)`)
-            viewTableFunction("role"); //show updated table 
+            let sql = 
+                `SELECT role.id, title, salary , department_name
+                FROM role
+                LEFT JOIN department ON department_id = department.id`;
+            viewTableFunction(sql); 
         });
     });
 };
@@ -205,7 +211,13 @@ const addEmployee = () => {
                 return;
             }
             console.log(`All Employees (plus newly added employee)`)
-            viewTableFunction("employee"); //show updated table 
+            let sql = 
+                    `SELECT employee.id, employee.first_name, employee.last_name, title, salary, department_name, manager.last_name AS manager
+                    FROM employee
+                    LEFT JOIN role ON role_id = role.id
+                    LEFT JOIN department ON department_id = department.id
+                    LEFT JOIN employee AS manager ON employee.manager_id = manager.id`;
+            viewTableFunction(sql);   //show updated table 
         });
     });
 };
@@ -230,16 +242,8 @@ const updateEmployee = () => {
         ]
     ).then((response) => {
 
-        console.log("response");
-        console.log(response);
-
         employee_id = response.fullName.split(" ")[0]; 
-        console.log("employee_id");
-        console.log(employee_id);
-
         role_id = response.title.split(" ")[0]; 
-        console.log("role_id");
-        console.log(role_id);
 
         const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
         const update = [ role_id, employee_id ]
@@ -251,7 +255,13 @@ const updateEmployee = () => {
                 return;
             }
             console.log(` Employee's role has been updated.`)
-            viewTableFunction("employee"); //show updated table 
+            let sql = 
+                    `SELECT employee.id, employee.first_name, employee.last_name, title, salary, department_name, manager.last_name AS manager
+                    FROM employee
+                    LEFT JOIN role ON role_id = role.id
+                    LEFT JOIN department ON department_id = department.id
+                    LEFT JOIN employee AS manager ON employee.manager_id = manager.id`;
+            viewTableFunction(sql);  //show updated table 
         });
     });
 };
