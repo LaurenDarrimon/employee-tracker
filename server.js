@@ -1,13 +1,15 @@
 // Import all the node goodies (modules)
 const conTable = require('console.table');
 const inquirer = require('inquirer');
-//const mysql = require('mysql2');
-const mysql = require('mysql2/promise'); 
+const mysql = require('mysql2');
+const mysqlPromise = require('mysql2/promise');  
 
 const questions = require("./lib/questions"); //import required files 
 //const add = require("./lib/add");
 //const view = require("./lib/view");
 
+let employeeArray; 
+let roleArray; 
 
 // Connect to the database of departments, roles, and employees that makes up this company
 const company = mysql.createConnection(
@@ -19,8 +21,13 @@ const company = mysql.createConnection(
     },
     console.log(`Connected to the company_db database.`)
 );
+
+
   
 const init = () => { //prompt user for what they would like to do 
+
+    getEmployeeArray();
+    getRoleArray();
 
     inquirer.prompt(questions.startQuestion).then((response) => {
         
@@ -138,86 +145,77 @@ const addEmployee = () => {
     });
 };
 
-let employeeArray; 
-let roleArray; 
 
-
-const getEmployeeArray = async() => {
+const getEmployeeArray = () => {
     employeeArray= []; 
-    company.promise().query(`SELECT first_name, last_name FROM employee`)
-        .then ((results) => {
-
-            console.log(results);
-
-            results.forEach(employee => {
-                let fullName  = employee.first_name + " " +  employee.last_name; 
-                employeeArray.push(fullName);    
-            });
-            console.log(employeeArray); 
-            return employeeArray;
-        })
-        // .catch(console.log)
-        // .then(() => company.end());                     
+    company.query(`SELECT id, first_name, last_name FROM employee`, function (err, results) {  
+        results.forEach(employee => {
+            let fullName  = employee.id + " - " + employee.first_name + " " +  employee.last_name; 
+            employeeArray.push(fullName);    
+        });
+    });                     
 }
-  
-  
-
 
 const getRoleArray = () => {
-    roleArray= []; 
-    company.promise().query(`SELECT title FROM role`, function (err, results) {
-        
+    roleArray = []; 
+    company.query(`SELECT id, title FROM role`, function (err, results) {   
         results.forEach(role => {
-            let title = role.title
-            employeeArray.push(title);    
+            let title = role.id + " - " + role.title
+            roleArray.push(title);    
         });
-        console.log(roleArray); 
     });
 }
 
-
-
-const updateEmployee = async () => {
-
+const updateEmployee = () => {
          
-    var eArray = await getEmployeeArray();
-            
+    console.log ("employee array: ")
+    console.log(employeeArray);
 
-    inquirer.prompt(
+    console.log ("role array: ")
+    console.log(roleArray);
+      
+    inquirer.prompt(  //prompted to select an employee to update and their new role
         [
-            //prompted to select an employee to update and their new role
             {
                 type: 'list',
                 message: 'Which Employee would you like to update?',
                 name: 'fullName',
-                choices: eArray,
+                choices: employeeArray,
             }, 
-            // {
-            //     type: 'input',
-            //     message: 'What is the employees new job title',
-            //     name: 'title',
-            //     choices: roleArray,
-            // }
+            {
+                type: 'list',
+                message: 'What is the employees new job title',
+                name: 'title',
+                choices: roleArray,
+            }
         ]
     ).then((response) => {
 
+        console.log("response");
         console.log(response);
-        // const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
-        // const update = [ response.role_id, response.id ]
 
-        // //query the company database for the row insert that we need with update sql preapred statement 
-        // company.query(sql, update, (err, result) => {
-        //     if (err) {
-        //         console.log({ error: err.message });
-        //         return;
-        //     }
-        //     console.log(` Employee's role has been updated.`)
-        //     viewTableFunction("employee"); //show updated table 
+        employee_id = response.fullName.split(" ")[0]; 
+        console.log("employee_id");
+        console.log(employee_id);
+
+        role_id = response.title.split(" ")[0]; 
+        console.log("role_id");
+        console.log(role_id);
+
+        const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+        const update = [ role_id, employee_id ]
+
+        //query the company database for the row insert that we need with update sql preapred statement 
+        company.query(sql, update, (err, result) => {
+            if (err) {
+                console.log({ error: err.message });
+                return;
+            }
+            console.log(` Employee's role has been updated.`)
+            viewTableFunction("employee"); //show updated table 
+        });
     });
-                
-                
-   
-}
+};
 
 const continueQ = () => {  //prompt the user if they would like to continue or quit
     inquirer.prompt(questions.continueYN).then((response) => {
@@ -230,8 +228,13 @@ const continueQ = () => {  //prompt the user if they would like to continue or q
     })   
 }
 
+
 init();  //call the first function, asking the user what work they would like to perform 
 
+
+company.connect(function (err) {
+     if (err) throw err;
+ });
     
 
 
