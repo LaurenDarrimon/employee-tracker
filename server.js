@@ -12,7 +12,6 @@ const internal = require("stream");
 const add = require("./lib/add");
 //const view = require("./lib/view");
 const questions = require("./lib/questions");
-const classes = require("./lib/classes");
 const { response } = require("express");
 //const { exit } = require("process");
 
@@ -34,8 +33,6 @@ const company = mysql.createConnection(
     },
     console.log(`Connected to the company_db database.`)
 );
-
-
   
 const init = () => {
     //prompt user for what they would like to do 
@@ -74,7 +71,7 @@ const init = () => {
             } break; 
 
             case "Update an Employee Role":{
-                add.updateRole(); 
+                updateEmployee(); 
             } break; 
         }
     }) 
@@ -151,6 +148,31 @@ const addEmployee = () => {
         });
     });
 };
+
+const updateEmployee = () => {
+
+    inquirer.prompt(questions.updateRoleQuestions).then((response) => {
+
+        console.log(response);
+
+        const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+        const update = [ response.role_id, response.id ]
+
+        console.log(update);
+
+        company.query(sql, update, (err, result) => {
+            if (err) {
+                console.log({ error: err.message });
+                return;
+            }
+            console.log(` Employee's role has been updated.`)
+            viewTableFunction("employee");
+        });
+    });
+
+
+    
+}
 
 
 
