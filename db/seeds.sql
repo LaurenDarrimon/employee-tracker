@@ -23,3 +23,6 @@ SELECT * FROM role;
 SELECT * FROM employee;
 
 
+SELECT role.id, title, salary, department_name
+FROM role
+LEFT JOIN department ON department_id = department.id;

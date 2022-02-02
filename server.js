@@ -40,15 +40,25 @@ const init = () => { //prompt user for what they would like to do
         switch (startOption) {
 
             case "View All Departments":{
-                viewTableFunction("department"); //display department table, then prompt if user would like to continue
+                let sql = `SELECT * FROM department`
+                viewTableFunction(sql); //display department table, then prompt if user would like to continue
             } break;;
 
             case "View All Roles" : { 
-                viewTableFunction("role"); //display role table
+                let sql = 
+                    `SELECT role.id, title, salary , department_name
+                    FROM role
+                    LEFT JOIN department ON department_id = department.id`;
+                viewTableFunction(sql); 
             } break;
 
             case "View All Employees": {
-                viewTableFunction("employee");   //display employee table,
+                let sql = 
+                    `SELECT employee.id, first_name, last_name, title, salary, department_name
+                    FROM employee
+                    LEFT JOIN role ON role_id = role.id
+                    LEFT JOIN department ON department_id = department.id`;
+                viewTableFunction(sql);   //display employee table,
             } break; 
 
             case  "Add a Department": {
@@ -71,13 +81,14 @@ const init = () => { //prompt user for what they would like to do
 }
 
 //function to display a table from sql prepared statement, gets passed the table name as an argument
-const viewTableFunction = (table_name) => {  
-    company.query(`SELECT * FROM ${table_name}`, function (err, results) {
+const viewTableFunction = (sql) => {  
+    company.query(sql, function (err, results) {
         console.log ("\n")
         console.table(results);  //console.table makes a nice display of tables from the command line 
         continueQ();  //once table is displayed, prompt user if they would like to quit or continue
     });
 }
+
 
 const addDepartment = () => {
     //ask the array of inquirer questions for a new department, imported from questions.js
