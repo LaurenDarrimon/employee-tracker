@@ -12,6 +12,7 @@ const internal = require("stream");
 const add = require("./lib/add");
 //const view = require("./lib/view");
 const questions = require("./lib/questions");
+const classes = require("./lib/classes");
 const { response } = require("express");
 //const { exit } = require("process");
 
@@ -34,13 +35,7 @@ const company = mysql.createConnection(
     console.log(`Connected to the company_db database.`)
 );
 
-const viewTableFunction = (viewTable) => {
-    company.query(`SELECT * FROM ${viewTable}`, function (err, results) {
-        console.log ("\n")
-        console.table(results);
-        continueQ();
-    });
-}
+
   
 const init = () => {
     //prompt user for what they would like to do 
@@ -55,7 +50,7 @@ const init = () => {
         switch (startOption) {
 
             case "View All Departments":{
-                viewTableFunction("department"); //display department table
+                viewTableFunction("department"); //display department table, then prompt if user would like to continue
             } break;;
 
             case "View All Roles" : { 
@@ -63,19 +58,19 @@ const init = () => {
             } break;
 
             case "View All Employees": {
-                viewTableFunction("employee");   //display employee table
+                viewTableFunction("employee");   //display employee table,
             } break; 
 
             case  "Add a Department": {
-                add.addDepartment();
+                addDepartment();   //add a department, then display all, prompt if user would like to continue
             } break;
 
            case  "Add a Role": {
-               add.addRole();
+               addRole(); //add a role, display all, prompt to continue or quit
             } break; 
 
             case "Add an Employee" :{
-                add.addEmployee();
+                addEmployee(); //add an employee, display all, prompt to continue or quit
             } break; 
 
             case "Update an Employee Role":{
@@ -84,6 +79,80 @@ const init = () => {
         }
     }) 
 }
+
+const viewTableFunction = (table_name) => {
+    company.query(`SELECT * FROM ${table_name}`, function (err, results) {
+        console.log ("\n")
+        console.table(results);
+        continueQ();
+    });
+}
+
+const addDepartment = () => {
+    inquirer.prompt(questions.department).then((response) => {
+
+        const sql = `INSERT INTO department (department_name) VALUES (?)`;
+        const department_name = [response.department];
+            
+        company.query(sql, department_name, (err, result) => {
+            if (err) {
+                console.log.json({ error: err.message });
+                return;
+            }
+            console.log(`All Departments (with newly added ${department_name}`)
+            viewTableFunction("department");
+        });
+    });
+};
+
+const addRole = () => {
+    inquirer.prompt(questions.role).then((response) => {
+            
+        const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;
+        const newRole = [
+            response.role, 
+            response.salary, 
+            response.department_id,
+        ]
+
+        company.query(sql, newRole, (err, result) => {
+            if (err) {
+                console.log({ error: err.message });
+                return;
+            }
+            console.log(`All Roles (plus newly added role)`)
+            viewTableFunction("role");
+        });
+    });
+};
+
+const addEmployee = () => {
+    inquirer.prompt(questions.employee).then((response) => {
+
+        console.log(response);
+
+        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+        const newEmployee = [
+            response.first_name, 
+            response.last_name, 
+            response.role_id, 
+            response.manager_id,
+        ]
+
+        console.log(newEmployee);
+
+        company.query(sql, newEmployee, (err, result) => {
+            if (err) {
+                console.log({ error: err.message });
+                return;
+            }
+            console.log(`All Employees (plus newly added employee)`)
+            viewTableFunction("employee");
+        });
+    });
+};
+
+
 
 const continueQ = () => {
     inquirer.prompt(questions.continueYN).then((response) => {
