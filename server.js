@@ -1,8 +1,8 @@
 // Import all the node goodies (modules)
 const conTable = require('console.table');
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
-//const mysql = require('mysql2/promise'); 
+//const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); 
 
 const questions = require("./lib/questions"); //import required files 
 //const add = require("./lib/add");
@@ -55,7 +55,8 @@ const init = () => { //prompt user for what they would like to do
             } break; 
 
             case "Update an Employee Role":{
-                updateEmployee(); 
+                getEmployeeArray();
+                //updateEmployee(); 
             } break; 
         }
     }) 
@@ -138,24 +139,83 @@ const addEmployee = () => {
     });
 };
 
+let employeeArray; 
+let roleArray; 
+
+
+const getEmployeeArray = () => {
+    employeeArray= []; 
+    company.promise().query(`SELECT first_name, last_name FROM employee`)
+        .then ((results) => {
+
+            console.log(results);
+
+            results.forEach(employee => {
+                let fullName  = employee.first_name + " " +  employee.last_name; 
+                employeeArray.push(fullName);    
+            });
+            console.log(employeeArray); 
+        })
+        // .catch(console.log)
+        // .then(() => company.end());                     
+}
+  
+  
+
+
+const getRoleArray = () => {
+    roleArray= []; 
+    company.promise().query(`SELECT title FROM role`, function (err, results) {
+        
+        results.forEach(role => {
+            let title = role.title
+            employeeArray.push(title);    
+        });
+        console.log(roleArray); 
+    });
+}
+
+
+
 const updateEmployee = () => {
 
-    inquirer.prompt(questions.updateRoleQuestions).then((response) => {
+    getEmployeeArray();
+    getRoleArray();
 
-        //console.log(response);
-        const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
-        const update = [ response.role_id, response.id ]
+    inquirer.prompt(
+        [
+            //prompted to select an employee to update and their new role
+            {
+                type: 'list',
+                message: 'Which Employee would you like to update?',
+                name: 'fullName',
+                choices: employeeArray,
+            }, 
+            // {
+            //     type: 'input',
+            //     message: 'What is the employees new job title',
+            //     name: 'title',
+            //     choices: roleArray,
+            // }
+        ]
+    ).then((response) => {
 
-        //query the company database for the row insert that we need with update sql preapred statement 
-        company.query(sql, update, (err, result) => {
-            if (err) {
-                console.log({ error: err.message });
-                return;
-            }
-            console.log(` Employee's role has been updated.`)
-            viewTableFunction("employee"); //show updated table 
-        });
+        console.log(response);
+        // const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+        // const update = [ response.role_id, response.id ]
+
+        // //query the company database for the row insert that we need with update sql preapred statement 
+        // company.query(sql, update, (err, result) => {
+        //     if (err) {
+        //         console.log({ error: err.message });
+        //         return;
+        //     }
+        //     console.log(` Employee's role has been updated.`)
+        //     viewTableFunction("employee"); //show updated table 
     });
+                
+                
+   
 }
 
 const continueQ = () => {  //prompt the user if they would like to continue or quit
