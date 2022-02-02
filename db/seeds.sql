@@ -11,11 +11,11 @@ VALUES  ("Engineer", 130000, 1),
         ("Poet", 120000, 3);
      
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES  ("Amira", "Afzal", 2, null),  
-        ("Verónica", "Rodriguez", 4, null),  
-        ("Elliot", "Smith", 1, 1),
-        ("Igor", "Stein", 1, 1),
-        ("Christoper", "Lee", 3, 2);
+VALUES  ("Joni", "Mitchell", 2, null),  
+        ("Neil", "Young", 4, null),  
+        ("Cat", "Stevens", 1, 1),
+        ("Bram", "Stoker", 1, 1),
+        ("Dr.", "Frankenstein", 3, 2);
 
 
 SELECT * FROM department;

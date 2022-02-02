@@ -10,6 +10,7 @@ const questions = require("./lib/questions"); //import required files
 
 let employeeArray; 
 let roleArray; 
+let departmentArray; 
 
 // Connect to the database of departments, roles, and employees that makes up this company
 const company = mysql.createConnection(
@@ -28,6 +29,7 @@ const init = () => { //prompt user for what they would like to do
 
     getEmployeeArray();
     getRoleArray();
+    getDepartmentArray();
 
     inquirer.prompt(questions.startQuestion).then((response) => {
         
@@ -97,14 +99,38 @@ const addDepartment = () => {
 };
 
 const addRole = () => {
-     //ask the array of inquirer questions for a new role, imported from questions.js
-    inquirer.prompt(questions.role).then((response) => {
+     //ask the array of inquirer questions for a new role,
+
+    inquirer.prompt(
+        [            
+            {
+                type: 'input',
+                message: 'What is the title of role:',
+                name: 'title',
+                default: "Songwriter",
+            },
+            {
+                type: 'input',
+                message: 'What is the salary of the role:',
+                name: 'salary',
+                default: 75000,
+            },
+            {
+                type: 'list',
+                message: 'Department:',
+                name: 'department',
+                choices: departmentArray,
+            }
+        ]
+    ).then((response) => {
+
+        console.log(response);
             
         const sql = `INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`;  //sql preapred statement 
         const newRole = [   //assign response into new array
-            response.role, 
+            response.title, 
             response.salary, 
-            response.department_id,
+            response.department.split(" ")[0],
         ]
 
         //query the company database for the row insert that we need
@@ -120,18 +146,46 @@ const addRole = () => {
 };
 
 const addEmployee = () => {
-     //ask the array of inquirer questions for a new employee, imported from questions.js
-    inquirer.prompt(questions.employee).then((response) => {
 
-        //console.log(response);
+     //ask the array of inquirer questions for a new employee, imported from questions.js
+    inquirer.prompt(
+        [
+            {
+                type: 'input',
+                message: 'Employee first name',
+                name: 'first_name',
+                default: "Bob"
+            },
+            {
+                type: 'input',
+                message: 'Employee last name',
+                name: 'last_name',
+                default: "Dylan"
+            },
+            {
+                type: 'list',
+                message: 'Employee job title:',
+                name: 'title',
+                choices: roleArray,
+            },
+            {
+                type: 'list',
+                message: 'Employees manager:',
+                name: 'manager',
+                choices: employeeArray,
+            }
+        ]
+    ).then((response) => {
 
         const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
         const newEmployee = [ //assign response into new array
             response.first_name, 
             response.last_name, 
-            response.role_id, 
-            response.manager_id,
-        ]
+            response.title.split(" ")[0], 
+            response.manager.split(" ")[0],
+        ];
+
+        console.log(newEmployee);
 
         //query the company database for the row insert that we need
         company.query(sql, newEmployee, (err, result) => {
@@ -146,34 +200,8 @@ const addEmployee = () => {
 };
 
 
-const getEmployeeArray = () => {
-    employeeArray= []; 
-    company.query(`SELECT id, first_name, last_name FROM employee`, function (err, results) {  
-        results.forEach(employee => {
-            let fullName  = employee.id + " - " + employee.first_name + " " +  employee.last_name; 
-            employeeArray.push(fullName);    
-        });
-    });                     
-}
-
-const getRoleArray = () => {
-    roleArray = []; 
-    company.query(`SELECT id, title FROM role`, function (err, results) {   
-        results.forEach(role => {
-            let title = role.id + " - " + role.title
-            roleArray.push(title);    
-        });
-    });
-}
-
 const updateEmployee = () => {
-         
-    console.log ("employee array: ")
-    console.log(employeeArray);
 
-    console.log ("role array: ")
-    console.log(roleArray);
-      
     inquirer.prompt(  //prompted to select an employee to update and their new role
         [
             {
@@ -184,7 +212,7 @@ const updateEmployee = () => {
             }, 
             {
                 type: 'list',
-                message: 'What is the employees new job title',
+                message: 'What is the employee\'s new job title',
                 name: 'title',
                 choices: roleArray,
             }
@@ -217,6 +245,36 @@ const updateEmployee = () => {
     });
 };
 
+const getEmployeeArray = () => {
+    employeeArray= []; 
+    company.query(`SELECT id, first_name, last_name FROM employee`, function (err, results) {  
+        results.forEach(employee => {
+            let fullName  = employee.id + " - " + employee.first_name + " " +  employee.last_name; 
+            employeeArray.push(fullName);    
+        });
+    });                     
+}
+
+const getRoleArray = () => {
+    roleArray = []; 
+    company.query(`SELECT id, title FROM role`, function (err, results) {   
+        results.forEach(role => {
+            let title = role.id + " - " + role.title
+            roleArray.push(title);    
+        });
+    });
+}
+
+const getDepartmentArray = () => {
+    departmentArray = []; 
+    company.query(`SELECT id, department_name FROM department`, function (err, results) {   
+        results.forEach(department => {
+            let newDep = department.id + " - " + department.department_name
+            departmentArray.push(newDep);    
+        });
+    });
+}
+
 const continueQ = () => {  //prompt the user if they would like to continue or quit
     inquirer.prompt(questions.continueYN).then((response) => {
         if (response.continue === 'continue'){  
@@ -227,7 +285,6 @@ const continueQ = () => {  //prompt the user if they would like to continue or q
         }
     })   
 }
-
 
 init();  //call the first function, asking the user what work they would like to perform 
 
