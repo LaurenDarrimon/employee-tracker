@@ -55,8 +55,7 @@ const init = () => { //prompt user for what they would like to do
             } break; 
 
             case "Update an Employee Role":{
-                getEmployeeArray();
-                //updateEmployee(); 
+                updateEmployee(); 
             } break; 
         }
     }) 
@@ -143,7 +142,7 @@ let employeeArray;
 let roleArray; 
 
 
-const getEmployeeArray = () => {
+const getEmployeeArray = async() => {
     employeeArray= []; 
     company.promise().query(`SELECT first_name, last_name FROM employee`)
         .then ((results) => {
@@ -155,6 +154,7 @@ const getEmployeeArray = () => {
                 employeeArray.push(fullName);    
             });
             console.log(employeeArray); 
+            return employeeArray;
         })
         // .catch(console.log)
         // .then(() => company.end());                     
@@ -177,10 +177,11 @@ const getRoleArray = () => {
 
 
 
-const updateEmployee = () => {
+const updateEmployee = async () => {
 
-    getEmployeeArray();
-    getRoleArray();
+         
+    var eArray = await getEmployeeArray();
+            
 
     inquirer.prompt(
         [
@@ -189,7 +190,7 @@ const updateEmployee = () => {
                 type: 'list',
                 message: 'Which Employee would you like to update?',
                 name: 'fullName',
-                choices: employeeArray,
+                choices: eArray,
             }, 
             // {
             //     type: 'input',
